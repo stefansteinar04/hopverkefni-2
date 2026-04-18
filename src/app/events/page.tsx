@@ -1,12 +1,34 @@
-type EventType = {
-  id: number;
-  translations?: { title: string }[];
-  venue?: { name: string; city: string };
-  startsAt?: string;
+import Link from "next/link";
+
+type Translation = {
+  lang?: string;
+  title?: string;
+  text?: string;
+  place?: string;
 };
 
-async function getEvents(): Promise<EventType[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, {
+type Venue = {
+  name?: string;
+  city?: string;
+};
+
+type EventType = {
+  id: number;
+  startsAt?: string;
+  endsAt?: string;
+  translations?: Translation[];
+  venue?: Venue;
+};
+
+type EventsResponse = {
+  items?: EventType[];
+  page?: number;
+  pages?: number;
+  total?: number;
+};
+
+async function getEvents(): Promise<EventsResponse> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events?page=1&limit=10`, {
     cache: "no-store",
   });
 
@@ -18,36 +40,41 @@ async function getEvents(): Promise<EventType[]> {
 }
 
 export default async function EventsPage() {
-  const events = await getEvents();
+  const data = await getEvents();
+  const events = data.items ?? [];
 
   return (
-    <main>
+    <div className="container">
       <h1>Viðburðir</h1>
+      <p>
+        Síða {data.page ?? 1} af {data.pages ?? 1} — samtals {data.total ?? events.length} viðburðir
+      </p>
 
       {events.length === 0 ? (
-        <p>Engir viðburðir fundust.</p>
+        <div className="card">
+          <p>Engir viðburðir fundust.</p>
+        </div>
       ) : (
-        <ul style={{ display: "grid", gap: "1rem", padding: 0, listStyle: "none" }}>
-          {events.map((event) => (
-            <li
-              key={event.id}
-              style={{
-                background: "#fff",
-                padding: "1rem",
-                borderRadius: "8px",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-              }}
-            >
-              <a href={`/events/${event.id}`}>
-                <h2>{event.translations?.[0]?.title ?? `Viðburður ${event.id}`}</h2>
-              </a>
-              <p>{event.venue?.name ?? "Óþekktur staður"}</p>
-              <p>{event.venue?.city ?? ""}</p>
-              <p>{event.startsAt ?? ""}</p>
-            </li>
-          ))}
-        </ul>
+        <div className="card-grid">
+          {events.map((event) => {
+            const translation =
+              event.translations?.find((t) => t.lang === "is") ?? event.translations?.[0];
+
+            return (
+              <article key={event.id} className="card">
+                <h2>{translation?.title ?? `Viðburður ${event.id}`}</h2>
+                <p>{translation?.place ?? event.venue?.name ?? "Óþekktur staður"}</p>
+                <p>{event.venue?.city ?? ""}</p>
+                <p>{event.startsAt ? new Date(event.startsAt).toLocaleString("is-IS") : ""}</p>
+
+                <Link className="button" href={`/events/${event.id}`}>
+                  Sjá nánar
+                </Link>
+              </article>
+            );
+          })}
+        </div>
       )}
-    </main>
+    </div>
   );
 }

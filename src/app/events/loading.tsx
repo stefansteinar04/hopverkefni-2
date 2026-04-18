@@ -1,3 +1,7 @@
 export default function LoadingEventsPage() {
-  return <p>Loading...</p>;
+  return (
+    <div className="container">
+      <p>Loading...</p>
+    </div>
+  );
 }

@@ -9,7 +9,7 @@ export default function LoginPage() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    setMessage("Sæki...");
+    setMessage("Sækir...");
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
@@ -23,7 +23,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.error ?? "Innskráning mistókst");
+        setMessage(data.message ?? data.error ?? "Innskráning mistókst");
         return;
       }
 
@@ -35,45 +35,37 @@ export default function LoginPage() {
   }
 
   return (
-    <main>
-      <h1>Innskráning</h1>
+    <div className="container">
+      <div className="card" style={{ maxWidth: "450px" }}>
+        <h1>Innskráning</h1>
 
-      <form
-        onSubmit={onSubmit}
-        style={{
-          display: "grid",
-          gap: "1rem",
-          maxWidth: "400px",
-          background: "#fff",
-          padding: "1rem",
-          borderRadius: "8px",
-        }}
-      >
-        <label>
-          Notendanafn
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-          />
-        </label>
+        <form onSubmit={onSubmit} style={{ display: "grid", gap: "1rem" }}>
+          <label>
+            Notendanafn
+            <input
+              className="input"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </label>
 
-        <label>
-          Lykilorð
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-          />
-        </label>
+          <label>
+            Lykilorð
+            <input
+              className="input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
 
-        <button type="submit" style={{ padding: "0.75rem" }}>
-          Skrá inn
-        </button>
+          <button className="button" type="submit">
+            Skrá inn
+          </button>
+        </form>
 
         <p>{message}</p>
-      </form>
-    </main>
+      </div>
+    </div>
   );
 }
